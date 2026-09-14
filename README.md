@@ -47,8 +47,28 @@ jobs:
 Both workflows expect the caller repo to provide:
 
 - `.nvmrc` (or pass `node-version-file` as a different path)
-- a `release.config.js` (or pass `config-file` as a different path) exporting a commitlint config and a release-it config, e.g. via [`@jorkab/commit-conventions`](https://github.com/jorkab/commit-conventions)
+- a `release.config.js` (or pass `config-file` as a different path) exporting a commitlint config and a release-it config, e.g. via [`commit-conventions`](https://github.com/jorkab/commit-conventions) (published on npm as `commit-conventions`, unscoped — currently `1.0.1`)
 - `npm ci` must succeed, i.e. `package-lock.json` committed and any private dependency reachable without extra auth
+
+### `release.config.js` shape
+
+Both workflows point at the same config file. `commitlint.yml` sets `ACTION_CONFIG=commitlint` when it runs, `release-it.yml` doesn't set it — so a single file can export either config depending on which workflow is calling it:
+
+```js
+const { commitlint, releaseIt } = require("commit-conventions");
+
+module.exports = process.env.ACTION_CONFIG === "commitlint" ? commitlint : releaseIt;
+```
+
+And the caller's `package.json` needs `commit-conventions` as a `devDependency`:
+
+```json
+{
+  "devDependencies": {
+    "commit-conventions": "1.0.1"
+  }
+}
+```
 
 ## Versioning
 
